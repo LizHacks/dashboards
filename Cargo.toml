@@ -1,0 +1,8 @@
+[package]
+name = "dashboards"
+version = "0.1.0"
+authors = ["Ruben Paz <me@ruben.io>"]
+
+[dependencies]
+actix-web = "0.7.13"
+actix = "0.7.5"
