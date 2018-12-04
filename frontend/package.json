@@ -1,0 +1,27 @@
+{
+  "name": "deplomator",
+  "version": "0.0.1",
+  "description": "frontend for deplomator",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LizHacks/deplomator.git"
+  },
+  "keywords": [
+    "elm",
+    "deployment",
+    "CI",
+    "integration"
+  ],
+  "author": "LizHacks team",
+  "bugs": {
+    "url": "https://github.com/LizHacks/deplomator/issues"
+  },
+  "homepage": "https://github.com/LizHacks/deplomator#readme"
+}
