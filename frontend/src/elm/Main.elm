@@ -11,12 +11,20 @@ import Url exposing (Url)
 
 
 type alias Model =
-    {}
+    { token : Maybe String
+    }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( {}, Cmd.none )
+type alias Flags =
+    Maybe String
+
+
+init : Flags -> ( Model, Cmd Msg )
+init maybeToken =
+    ( { token = maybeToken
+      }
+    , Cmd.none
+    )
 
 
 
@@ -51,11 +59,11 @@ view model =
 ---- PROGRAM ----
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.application
         { view = view
-        , init = \_ _ _ -> init
+        , init = \flags _ _ -> init flags
         , update = update
         , subscriptions = always Sub.none
         , onUrlChange = ChangeUrl
