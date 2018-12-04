@@ -1,3 +1,3 @@
-# Dashboards
+# Deplomator
 
-A dashboard rotation tool
+A tool for deployment using GH branches.
