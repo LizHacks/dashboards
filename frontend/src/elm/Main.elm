@@ -1,8 +1,12 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import Browser.Navigation exposing (Key)
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
+import List
+import Login exposing (LoginModel)
+import RemoteData exposing (WebData)
 import Url exposing (Url)
 
 
@@ -11,7 +15,8 @@ import Url exposing (Url)
 
 
 type alias Model =
-    { token : Maybe String
+    { loginModel : LoginModel
+    , token : WebData String
     }
 
 
@@ -19,12 +24,14 @@ type alias Flags =
     Maybe String
 
 
-init : Flags -> ( Model, Cmd Msg )
-init maybeToken =
-    ( { token = maybeToken
-      }
-    , Cmd.none
-    )
+init : Flags -> Url -> Key -> ( Model, Cmd Msg )
+init maybeToken _ _ =
+    case maybeToken of
+        Just token ->
+            ( { loginModel = Login.init, token = RemoteData.Success token }, Cmd.none )
+
+        Nothing ->
+            ( { loginModel = Login.init, token = RemoteData.NotAsked }, Cmd.none )
 
 
 
@@ -34,6 +41,7 @@ init maybeToken =
 type Msg
     = ChangeUrl Url
     | ClickedLink Browser.UrlRequest
+    | LoginMsg Login.LoginMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -45,14 +53,24 @@ update msg model =
 ---- VIEW ----
 
 
-view : Model -> Browser.Document Msg
-view model =
-    { title = "Deplomator - A LizHacks thingy"
-    , body =
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        ]
+mapDocument : (a -> Msg) -> Browser.Document a -> Browser.Document Msg
+mapDocument toMsg { title, body } =
+    { title = title
+    , body = List.map (Html.map toMsg) body
     }
+
+
+view : Model -> Browser.Document Msg
+view ({ token } as model) =
+    if RemoteData.isSuccess token then
+        { title = "Deplomator - A LizHacks Thingy"
+        , body =
+            [ h1 [] [ text "There will be some stuff here" ]
+            ]
+        }
+
+    else
+        Login.view model |> mapDocument LoginMsg
 
 
 
@@ -63,7 +81,7 @@ main : Program Flags Model Msg
 main =
     Browser.application
         { view = view
-        , init = \flags _ _ -> init flags
+        , init = init
         , update = update
         , subscriptions = always Sub.none
         , onUrlChange = ChangeUrl
