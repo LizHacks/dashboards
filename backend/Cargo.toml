@@ -6,3 +6,9 @@ authors = ["Ruben Paz <me@ruben.io>"]
 [dependencies]
 actix-web = "0.7.13"
 actix = "0.7.5"
+postgres = "0.15.2"
+config = "0.9.1"
+serde = "1.0.80"
+serde_derive = "1.0.80"
+r2d2 = "0.8.3"
+r2d2_postgres = "0.14.0"
