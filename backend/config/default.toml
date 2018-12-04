@@ -1,0 +1,2 @@
+[database]
+url = "postgres://repositive:repositive@localhost:5432/deplomator"
