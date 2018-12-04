@@ -1,8 +1,10 @@
-module Main exposing (..)
+module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
+import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
+import Url exposing (Url)
+
 
 
 ---- MODEL ----
@@ -22,7 +24,8 @@ init =
 
 
 type Msg
-    = NoOp
+    = ChangeUrl Url
+    | ClickedLink Browser.UrlRequest
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -34,12 +37,14 @@ update msg model =
 ---- VIEW ----
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    div []
+    { title = "Deplomator - A LizHacks thingy"
+    , body =
         [ img [ src "/logo.svg" ] []
         , h1 [] [ text "Your Elm App is working!" ]
         ]
+    }
 
 
 
@@ -48,9 +53,11 @@ view model =
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.application
         { view = view
-        , init = \_ -> init
+        , init = \_ _ _ -> init
         , update = update
         , subscriptions = always Sub.none
+        , onUrlChange = ChangeUrl
+        , onUrlRequest = ClickedLink
         }
