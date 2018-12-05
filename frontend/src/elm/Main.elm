@@ -17,6 +17,7 @@ import Url exposing (Url)
 type alias Model =
     { loginModel : LoginModel
     , token : WebData String
+    , key : Browser.Navigation.Key
     }
 
 
@@ -25,13 +26,23 @@ type alias Flags =
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init maybeToken _ _ =
+init maybeToken _ key =
     case maybeToken of
         Just token ->
-            ( { loginModel = Login.init, token = RemoteData.Success token }, Cmd.none )
+            ( { loginModel = Login.init
+              , key = key
+              , token = RemoteData.Success token
+              }
+            , Cmd.none
+            )
 
         Nothing ->
-            ( { loginModel = Login.init, token = RemoteData.NotAsked }, Cmd.none )
+            ( { loginModel = Login.init
+              , key = key
+              , token = RemoteData.NotAsked
+              }
+            , Cmd.none
+            )
 
 
 
