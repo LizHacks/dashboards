@@ -6,6 +6,7 @@ import Entities.User exposing (JWT, JWTError(..), parseJwtString)
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
 import List
+import Pages.Dashboard as Dashboard exposing (DashboardModel)
 import Pages.Login as Login exposing (LoginModel)
 import RemoteData exposing (RemoteData)
 import Url exposing (Url)
@@ -17,6 +18,7 @@ import Url exposing (Url)
 
 type alias Model =
     { loginModel : LoginModel
+    , dashboardModel : DashboardModel
     , token : RemoteData JWTError JWT
     , key : Browser.Navigation.Key
     }
@@ -31,6 +33,7 @@ init maybeToken _ key =
     case maybeToken of
         Just token ->
             ( { loginModel = Login.init
+              , dashboardModel = Dashboard.init
               , key = key
               , token =
                     parseJwtString token
@@ -42,6 +45,7 @@ init maybeToken _ key =
 
         Nothing ->
             ( { loginModel = Login.init
+              , dashboardModel = Dashboard.init
               , key = key
               , token = RemoteData.NotAsked
               }
@@ -57,6 +61,7 @@ type Msg
     = ChangeUrl Url
     | ClickedLink Browser.UrlRequest
     | LoginMsg Login.LoginMsg
+    | DashboardMsg Dashboard.DashboardMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -71,6 +76,10 @@ update msg model =
         LoginMsg loginMsg ->
             Login.update loginMsg model
                 |> (\( newModel, loginCmd ) -> ( newModel, loginCmd |> Cmd.map LoginMsg ))
+
+        DashboardMsg dashboardMsg ->
+            Dashboard.update dashboardMsg model
+                |> (\( newModel, dashboardCmd ) -> ( newModel, dashboardCmd |> Cmd.map DashboardMsg ))
 
 
 
@@ -87,11 +96,7 @@ mapDocument toMsg { title, body } =
 view : Model -> Browser.Document Msg
 view ({ token } as model) =
     if RemoteData.isSuccess token then
-        { title = "Deplomator - A LizHacks Thingy"
-        , body =
-            [ h1 [] [ text "There will be some stuff here" ]
-            ]
-        }
+        Dashboard.view model |> mapDocument DashboardMsg
 
     else
         Login.view model |> mapDocument LoginMsg
