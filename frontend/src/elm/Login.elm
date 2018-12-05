@@ -2,7 +2,8 @@ module Login exposing (LoginModel, LoginMsg(..), init, update, view)
 
 import Browser
 import Html exposing (Html, button, div, form, h1, h2, img, section, text)
-import Html.Attributes exposing (class, src)
+import Html.Attributes exposing (class, classList, src)
+import Html.Events exposing (onSubmit)
 import RemoteData exposing (WebData)
 import UiUtils exposing (defaultFieldConfig, field)
 
@@ -38,12 +39,41 @@ init =
 type LoginMsg
     = UpdateEmail String
     | UpdatePassword String
-    | LoadingUpdate (WebData ())
+    | LoginUpdate (WebData String)
 
 
 update : LoginMsg -> Model a -> ( Model a, Cmd LoginMsg )
-update msg model =
-    ( model, Cmd.none )
+update msg ({ loginModel } as model) =
+    case msg of
+        UpdateEmail newEmail ->
+            ( { model
+                | loginModel =
+                    { loginModel
+                        | email = newEmail
+                    }
+              }
+            , Cmd.none
+            )
+
+        UpdatePassword newPassword ->
+            ( { model
+                | loginModel =
+                    { loginModel
+                        | password = newPassword
+                    }
+              }
+            , Cmd.none
+            )
+
+        LoginUpdate newToken ->
+            ( { model | token = newToken }
+            , if RemoteData.isLoading newToken then
+                -- TODO ask the acccount to login
+                Debug.log "we need to as account for this login" Cmd.none
+
+              else
+                Cmd.none
+            )
 
 
 
@@ -59,12 +89,29 @@ view model =
                 [ h1 [ class "title" ] [ text "Deplomator: deploy and monitor repositive" ]
                 , h2 [ class "subtitle" ] [ text "Before seeing cool charts and deploying anything: Login!" ]
                 , div [ class "columns is-centered" ]
-                    [ form [ class "column is-half" ]
-                        [ field { defaultFieldConfig | placeholder = "liz@repositive.io" } [ text "Email" ] UpdateEmail
-                        , field { defaultFieldConfig | placeholder = "**************", type_ = "password" } [ text "Password" ] UpdatePassword
+                    [ form [ class "column is-half", onSubmit (LoginUpdate RemoteData.Loading) ]
+                        [ field
+                            { defaultFieldConfig
+                                | placeholder = "liz@repositive.io"
+                            }
+                            [ text "Email" ]
+                            UpdateEmail
+                        , field
+                            { defaultFieldConfig
+                                | placeholder = "**************"
+                                , type_ = "password"
+                            }
+                            [ text "Password" ]
+                            UpdatePassword
                         , div [ class "field" ]
                             [ div [ class "control" ]
-                                [ button [ class "button is-primary" ] [ text "Login!" ]
+                                [ button
+                                    [ classList
+                                        [ ( "button is-primary", True )
+                                        , ( "is-loading is-disabled", RemoteData.isLoading model.token )
+                                        ]
+                                    ]
+                                    [ text "Login!" ]
                                 ]
                             ]
                         ]

@@ -2,6 +2,7 @@ module UiUtils exposing (BulmaType(..), FieldConfig, defaultFieldConfig, field)
 
 import Html exposing (Html, div, form, i, input, label, span)
 import Html.Attributes exposing (class, classList, type_)
+import Html.Events exposing (onInput)
 
 
 type BulmaType
@@ -62,7 +63,7 @@ field config labelContent onChange =
             [ classList [ ( "control", True ), ( "has-icon-left", config.iconLeft /= Nothing ), ( "has-icon-right", config.iconRight /= Nothing ) ] ]
           <|
             input
-                [ class "input", type_ config.type_ ]
+                [ class "input", type_ config.type_, onInput onChange ]
                 []
                 :: ([ config.iconLeft
                         |> Maybe.map

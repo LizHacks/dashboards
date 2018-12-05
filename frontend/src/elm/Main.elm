@@ -57,7 +57,16 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        ChangeUrl _ ->
+            ( model, Cmd.none )
+
+        ClickedLink _ ->
+            ( model, Cmd.none )
+
+        LoginMsg loginMsg ->
+            Login.update loginMsg model
+                |> (\( newModel, loginCmd ) -> ( newModel, loginCmd |> Cmd.map LoginMsg ))
 
 
 
