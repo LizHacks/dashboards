@@ -2,13 +2,14 @@ port module Pages.Login exposing (LoginModel, LoginMsg(..), init, update, view)
 
 import Browser
 import Config
+import Entities.User exposing (JWT, JWTError(..), parseJwtString)
 import Html exposing (Html, button, div, form, h1, h2, img, section, text)
 import Html.Attributes exposing (class, classList, src)
 import Html.Events exposing (onSubmit)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import RemoteData exposing (WebData)
+import RemoteData exposing (RemoteData)
 import UiUtils exposing (defaultFieldConfig, field)
 
 
@@ -25,7 +26,7 @@ type alias LoginModel =
 type alias Model a =
     { a
         | loginModel : LoginModel
-        , token : WebData String
+        , token : RemoteData JWTError JWT
     }
 
 
@@ -43,7 +44,7 @@ init =
 type LoginMsg
     = UpdateEmail String
     | UpdatePassword String
-    | LoginUpdate (WebData String)
+    | LoginUpdate (RemoteData JWTError JWT)
 
 
 update : LoginMsg -> Model a -> ( Model a, Cmd LoginMsg )
@@ -76,8 +77,8 @@ update msg ({ loginModel } as model) =
                 RemoteData.Loading ->
                     attemptLogin loginModel
 
-                RemoteData.Success token ->
-                    saveJwt token
+                RemoteData.Success ( rawToken, _ ) ->
+                    saveJwt rawToken
 
                 RemoteData.Failure err ->
                     Cmd.none
@@ -97,7 +98,14 @@ attemptLogin { email, password } =
                     [ ( "email", Encode.string email )
                     , ( "password", Encode.string password )
                     ]
-        , expect = Http.expectJson (RemoteData.fromResult >> LoginUpdate) authTokenDecoder
+        , expect =
+            Http.expectJson
+                (Result.mapError HttpError
+                    >> Result.andThen (parseJwtString >> Result.mapError JwtDecodeError)
+                    >> RemoteData.fromResult
+                    >> LoginUpdate
+                )
+                authTokenDecoder
         }
 
 

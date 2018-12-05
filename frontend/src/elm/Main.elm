@@ -2,11 +2,12 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Browser.Navigation exposing (Key)
+import Entities.User exposing (JWT, JWTError(..), parseJwtString)
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
 import List
 import Pages.Login as Login exposing (LoginModel)
-import RemoteData exposing (WebData)
+import RemoteData exposing (RemoteData)
 import Url exposing (Url)
 
 
@@ -16,7 +17,7 @@ import Url exposing (Url)
 
 type alias Model =
     { loginModel : LoginModel
-    , token : WebData String
+    , token : RemoteData JWTError JWT
     , key : Browser.Navigation.Key
     }
 
@@ -31,7 +32,10 @@ init maybeToken _ key =
         Just token ->
             ( { loginModel = Login.init
               , key = key
-              , token = RemoteData.Success token
+              , token =
+                    parseJwtString token
+                        |> Result.mapError JwtDecodeError
+                        |> RemoteData.fromResult
               }
             , Cmd.none
             )

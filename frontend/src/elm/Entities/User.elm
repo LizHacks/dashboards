@@ -1,4 +1,4 @@
-module User exposing (JWT, User)
+module Entities.User exposing (JWT, JWTError(..), User, parseJwtString)
 
 import Http
 import Json.Decode as Decode
@@ -19,23 +19,23 @@ type JWTError
     | JwtDecodeError Jwt.JwtError
 
 
-type JWT
-    = JWT ( String, User )
+type alias JWT =
+    ( String, User )
 
 
 parseJwtString : String -> Result Jwt.JwtError JWT
 parseJwtString token =
     Jwt.decodeToken userDecoder token
-        |> Result.map (\user -> JWT ( token, user ))
+        |> Result.map (\user -> ( token, user ))
 
 
 userDecoder : Decode.Decoder User
 userDecoder =
     Decode.succeed User
-        |> andMap (field "user_id" Decode.string)
-        |> andMap (field "name" Decode.string)
-        |> andMap (field "email" Decode.string)
-        |> andMap (field "avatar" Decode.string)
+        |> andMap (Decode.field "user_id" Decode.string)
+        |> andMap (Decode.field "name" Decode.string)
+        |> andMap (Decode.field "email" Decode.string)
+        |> andMap (Decode.field "avatar" Decode.string)
 
 
 
