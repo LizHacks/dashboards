@@ -5,7 +5,7 @@ import Browser.Navigation exposing (Key)
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
 import List
-import Login exposing (LoginModel)
+import Pages.Login as Login exposing (LoginModel)
 import RemoteData exposing (WebData)
 import Url exposing (Url)
 

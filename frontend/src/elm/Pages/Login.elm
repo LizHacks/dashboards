@@ -1,4 +1,4 @@
-port module Login exposing (LoginModel, LoginMsg(..), init, update, view)
+port module Pages.Login exposing (LoginModel, LoginMsg(..), init, update, view)
 
 import Browser
 import Config
