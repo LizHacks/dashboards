@@ -1,9 +1,13 @@
-module Login exposing (LoginModel, LoginMsg(..), init, update, view)
+port module Login exposing (LoginModel, LoginMsg(..), init, update, view)
 
 import Browser
+import Config
 import Html exposing (Html, button, div, form, h1, h2, img, section, text)
 import Html.Attributes exposing (class, classList, src)
 import Html.Events exposing (onSubmit)
+import Http
+import Json.Decode as Decode
+import Json.Encode as Encode
 import RemoteData exposing (WebData)
 import UiUtils exposing (defaultFieldConfig, field)
 
@@ -66,14 +70,43 @@ update msg ({ loginModel } as model) =
             )
 
         LoginUpdate newToken ->
+            -- TODO give feedback when the login fails
             ( { model | token = newToken }
-            , if RemoteData.isLoading newToken then
-                -- TODO ask the acccount to login
-                Debug.log "we need to as account for this login" Cmd.none
+            , case newToken of
+                RemoteData.Loading ->
+                    attemptLogin loginModel
 
-              else
-                Cmd.none
+                RemoteData.Success token ->
+                    saveJwt token
+
+                RemoteData.Failure err ->
+                    Cmd.none
+
+                RemoteData.NotAsked ->
+                    Cmd.none
             )
+
+
+attemptLogin : LoginModel -> Cmd LoginMsg
+attemptLogin { email, password } =
+    Http.post
+        { url = Config.baseAccountApi ++ "/login"
+        , body =
+            Http.jsonBody <|
+                Encode.object
+                    [ ( "email", Encode.string email )
+                    , ( "password", Encode.string password )
+                    ]
+        , expect = Http.expectJson (RemoteData.fromResult >> LoginUpdate) authTokenDecoder
+        }
+
+
+authTokenDecoder : Decode.Decoder String
+authTokenDecoder =
+    Decode.at [ "result", "token" ] Decode.string
+
+
+port saveJwt : String -> Cmd msg
 
 
 
